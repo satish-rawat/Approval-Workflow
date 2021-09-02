@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <base target="_top">
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet" type="text/css"></link>
+    <title>VF Leave Request</title>
+  </head>
+  <body>
+    <script>
+      function validateForm() {
+        let fromDate = document.forms["UNNOForm"]["fromdate"].value;
+        let toDate = document.forms["UNNOForm"]["todate"].value;
+        if (fromDate > toDate) {
+          alert("Start Date is After End Date");
+          return false;
+        }
+      };
+      function GetLeads(team) {
+      google.script.run.withSuccessHandler(function(ar) {
+        console.log(ar);
+        leads.length = 0;
+        let option = document.createElement("option");
+        option.value = "";
+        option.text = "Select Approving Lead LDAP";
+        leads.appendChild(option);
+        ar.forEach(function(item, index) {    
+          let option = document.createElement("option");
+          option.value = item;
+          option.text = item;
+          leads.appendChild(option);    
+        });
+      }).getLeads(team);
+    };
+    function GetRequestorLDAP(team) {
+      google.script.run.withSuccessHandler(function(ar) {
+        console.log(ar);
+        requestor.length = 0;
+        let option = document.createElement("option");
+        option.value = "";
+        option.text = "Select Requestor LDAP";
+        requestor.appendChild(option);
+        ar.forEach(function(item, index) {    
+          let option = document.createElement("option");
+          option.value = item;
+          option.text = item;
+          requestor.appendChild(option);    
+        });
+      }).getRequestorLDAP(team);
+    };
+    </script>
+    <style>
+      .indent-small {
+        margin-left: 5px;
+      }
+      .form-group.internal {
+        margin-bottom: 0;
+      }
+      .dialog-panel {
+        margin: 10px;
+      }
+      .panel-body {  
+        background: #e5e5e5; /* Old browsers */
+        background: -moz-radial-gradient(center, ellipse cover,  #e5e5e5 0%, #ffffff 100%); /* FF3.6+ */
+        background: -webkit-gradient(radial, center center, 0px, center center, 100%, color-stop(0%,#e5e5e5), color-stop(100%,#ffffff)); /*      Chrome,Safari4+ */
+        background: -webkit-radial-gradient(center, ellipse cover,  #e5e5e5 0%,#ffffff 100%); /* Chrome10+,Safari5.1+ */
+        background: -o-radial-gradient(center, ellipse cover,  #e5e5e5 0%,#ffffff 100%); /* Opera 12+ */
+        background: -ms-radial-gradient(center, ellipse cover,  #e5e5e5 0%,#ffffff 100%); /* IE10+ */
+        background: radial-gradient(ellipse at center,  #e5e5e5 0%,#ffffff 100%); /* W3C */
+        filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#e5e5e5', endColorstr='#ffffff',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+        font: 600 15px "Open Sans",Arial,sans-serif;
+      }
+      label.control-label {
+        font-weight: 600;
+        color: #777;  
+      }
+    </style>
+    <?var url = getUrl();?>
+    <div class="container">
+			<div class="panel panel-primary dialog-panel">
+				<div class="panel-heading">
+					<h5>Leave Request</h5>
+				</div>
+				<div class="panel-body">
+					<form name="UNNOForm" class="form-horizontal" onsubmit="return validateForm()" role="form" method="post" action="<?= url ?>">
+						<div class="form-group">
+							<div class="col-md-offset-6 col-md-4">
+								<span><?= message ?></span>
+							</div>
+						</div>
+            <div class="form-group">
+							<label class="control-label col-md-2 col-md-offset-2" for="teams">Team</label>
+							<div class="col-md-4">
+								<select class="form-control" name="team" type="text" onchange="GetLeads(this.value);GetRequestorLDAP(this.value);" required>
+									<option value="" disabled selected>Select your Team</option>
+									<? for(var i = 0; i < teams.length; i++) { ?>      
+									<option value="<?= teams[i] ?>" ><?= teams[i] ?></option>
+									<? } ?>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2 col-md-offset-2" for="leads">Approving Lead</label>
+							<div class="col-md-4">
+								<select class="form-control" name="leads" id="leads" required>
+									<option value="" disabled selected>Select Lead LDAP</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2 col-md-offset-2" for="requestor">Requestor</label>
+							<div class="col-md-4">
+								<select class="form-control" name="requestor" id="requestor" required>
+									<option value="" disabled selected>Select Requestor LDAP</option>
+								</select>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2 col-md-offset-2" for="fromdate">Start Date Time</label>
+							<div class="col-md-8">
+								<div class="col-md-3">
+									<div class="form-group internal input-group">
+										<input name="fromdate" type="datetime-local" class="form-control datepicker" id="fromdate" required></input>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2 col-md-offset-2" for="todate">End Date Time</label>
+							<div class="col-md-8">
+								<div class="col-md-3">
+									<div class="form-group internal input-group">
+										<input name="todate" type="datetime-local" class="form-control datepicker" id="todate"></input>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2 col-md-offset-2" for="reason">Reason</label>
+							<div class="col-md-8">
+								<div class="col-md-3">
+									<div class="form-group internal">
+										<select class="form-control" id="reason" required>
+											<option value="Medical Leave">Medical Leave</option>
+											<option value="Personal Leave">Personal Leave</option>
+											<option value="Casual Leave">Casual Leave</option>
+											<option value="Power Outage">Power Outage</option>
+											<option value="Network Issue">Network Issue</option>
+										</select>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<label class="control-label col-md-2 col-md-offset-2" for="id_comments">Backup Info</label>
+							<div class="col-md-6">
+								<textarea class="form-control" id="backup" placeholder="<Bug id> <Project Name> <Backup>" rows="5"></textarea>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-md-offset-6 col-md-4">
+								<button class="btn-lg btn-primary" type="submit">Submit</button>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>  
+  </body>
+</html>
